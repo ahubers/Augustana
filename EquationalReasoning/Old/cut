@@ -1,0 +1,210 @@
+
+
+--------------------------------------------------------------------------------
+-- fold as list replacement
+
+-- Given lists xs = [x1 , x2, ... , xn] and ys = [y1, y2, ... , ym], 
+-- the concatenation of xs to ys is the list 
+-- [x1 , ... , xn , y1, ... , ym]
+-- STRETCH EXERCISE: CAN WE USE fold AND (:) TO DEFINE CONCATENATION?
+append :: [Int] -> [Int] -> [Int]
+append xs ys = undefined -- fold (:) ys xs
+
+-- >>> append [4,5,6] [1,2,3]
+-- [4,5,6,1,2,3]
+
+-- We can count the number of elements in a list using the function length.
+
+length :: [a] -> Int
+length xs = fold inc 0 xs
+  where 
+    inc :: a -> Int -> Int 
+    inc a n = n + 1    
+
+-- The length function works because the anonymous function adds 1
+-- for as many instances of (:) there are in the list.
+--- >>> length [1, 2, 3]
+-- 3
+
+
+
+--- >>> doubleall [2, 4, 6]
+-- [4,8,12]
+
+
+  ON BOARD:
+   ## Thesis
+   My thesis is that pure functional programs enables a style of highly reusable,
+   clean, and easy-to-reason-about modularity. This modularity permits higher
+   productivity, meaning:
+     - small modules can be coded quickly and easily
+     - General purpose-modules can be reused, leading to faster development 
+       of subsequent programs
+     - Modules can be tested independently, reducing time spent debugging
+
+-- The constant function can also be generalized to polymorphic type:
+const :: a -> b -> a 
+const x y = x
+
+foo :: b -> String
+foo = const "foo"
+
+examples :: [String]
+examples = [ 
+  foo 1 , 
+  foo "bar" , 
+  foo 1.0 , 
+  foo True , 
+  foo foo ] -- <--- Can even pass other functions to `foo`!
+-- >>> examples
+-- ["foo","foo","foo","foo","foo"]
+
+-- TODO: remove filter? 
+
+-- WRITE: 
+-- Now let's write `filter f xs` as a fold, where
+-- filter f [x1 , ... , xn] = the list of x_i's such that f(x_i) == true
+-- SAY:
+-- QUESTION: Any ideas? I have my own way but I am eager to hear other ideas. 
+-- I don't want specific code, just a broad strategy, then we'll implement it together. 
+-- 
+-- WRITE: 
+-- My idea:
+--   Let's turn filter f [x1 , ... , xn]
+-- into
+--   [x1] ++ [x2] ++ ... ++ [xn]
+-- BUT! [x_i] only appears in the term above if f x_i == true. 
+-- (This is what `filt` does!)
+
+filter f xs = fold (concat . filt) [] xs -- fold undefined [] xs
+  where 
+    filt x = if f x then [x] else [] 
+
+-- Notice that `.` is function composition! Specifically:
+-- (f . g) x = f (g x)
+
+-- Testing it out!
+isEven n = n `mod` 2 == 0 
+
+--- >>> filter isEven [1, 2, 3, 4]
+-- [2,4]
+
+
+
+-- SAY: 
+-- We're going to move towards another higher-order function---map. 
+-- First, the following function doubles its input. 
+double n = 2 * n 
+
+-- WRITE:
+-- Should have:
+--   doubleAll [1, 2, 3] = [2, 4, 6]
+-- Then: 
+doubleAll xs = fold (cons . double) [] xs -- fold undefined [] xs 
+-- Where:
+--  (f . g) x = f (g x)
+-- And so 
+--   doubleAll (x1 : ... : xn : [])
+-- = (cons (double x1) (cons (double x2) (... (cons (double xn) [])))
+-- = double x1 : double x2 : ... : double xn : [] 
+
+
+-- >>> doubleAll [1, 2, 3]
+-- [2,4,6]
+
+-- SAY:
+-- We can generalize this procedure to get a function called `map`. 
+-- Let's replace `double` with an arbitrary function `f`:
+map' f xs = fold (cons . f) [] xs 
+
+-- >>> map' double [1, 2, 3]
+
+-- WRITE:
+-- It follows very simply that doubleAll = map' double: 
+-- EXERCISE:
+--   doubleAll xs
+-- = fold (cons . double) [] xs 
+-- = map' double xs
+
+-- SAY:
+-- The definition of map as a fold is clever, but 
+-- it is slightly easier to reason about map using its own 
+-- equational definition: 
+map f [] =  [] 
+map f (x : xs) = f x : map f xs 
+
+-- SAY: 
+-- Haskell has a frequently used function called "lines" used for reading 
+-- text input.
+l = lines "hello\nworld\n"
+
+-- >>> l 
+-- ["hello","world"]
+
+-- SAY: 
+-- We can use fold & map to compute its inverse
+unlines xs = flatten (map (flip concat "\n") xs)
+  where
+    flip f x y = f y x
+
+-- >>> unlines ["hello", "world"]
+-- "hello\nworld\n"
+
+--------------------------------------------------------------------------------
+-- 
+
+-- SAY:
+-- I'll give the next one:
+concat xs ys = fold cons ys xs 
+
+-- >>> concat [1, 2, 3] [3, 4, 5]
+-- [1,2,3,3,4,5]
+
+-- SAY: 
+-- QUESTION: How can we write a function `flatten` that 
+-- combines a list of lists into a list.
+-- WRITE:    
+-- Should have:
+--   flatten [[1] , [2, 3, 4], [5]]
+-- = [1, 2, 3, 4, 5]
+flatten xs = fold concat [] xs
+-- >>> flatten [[1] , [2, 3, 4], [5]]
+-- [1,2,3,4,5]
+
+-- SAY:
+-- N.b. that strings are just lists of characters
+-- >>> flatten ["h" , "ello", " ", "world"]
+-- "hello world"
+
+{- 
+SAY: 
+Let's verify equationally that fold is doing what we want it to do.
+
+WRITE:
+As an example, let's compute: 
+  fold add 0 [1, 2, 3] 
+where add x y = x + y: 
+
+  fold add 0 [1, 2, 3]
+= fold add 0 (1 : 2 : 3 : [])
+  QUESTION: Which equation applies here?
+= add 1 (fold add 0 (2 : 3 : []))
+  QUESTION: Do we see the pattern? 
+= add 1 (add 2 (fold add 0 (3 : [])))
+  QUESTION: Which equation applies here? 
+= add 1 (add 2 (add 3 0))
+= 1 + 2 + 3 + 0
+
+More generally we have 
+  fold f e (x1 : ... : xn : [])
+= f x1 (f x2 (... (f xn e)))
+(Do we see that this is just the infix, generalized version of
+ x1 + x2 + ... + xn + 0?)
+-}
+
+
+-- SAY: And then anyTrue has False as the empty list case
+--      and "or" as the binary operator. 
+anyTrue' xs = fold (||) False xs 
+
+-- >>> anyTrue' [False, False, False]

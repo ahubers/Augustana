@@ -1,0 +1,312 @@
+module EquationalReasoning where
+import Data.Char (toUpper)
+import Prelude hiding 
+  (sum, concat, length, map, repeat, sqrt, filter, any, all, const, succ, reverse, unlines , negate)
+
+{- -----------------------------------------------------------------------------
+Talk for Augustana College, Weds Feb 25, 2026
+Alex Hubers, University of Iowa
+--------------------------------------------------------------------------------
+-- (1) introduction. (5 minutes)
+
+SAY:
+Some ground rules:
+1. Please just call me Alex.
+2. This talk is meant to feel like a classroom, 
+   so ask questions and answer mine.
+
+SAY:
+Today I want to share a topic I love: functional programming in Haskell.
+To keep things accessible, I’ve restricted our scope to one idea:
+**equational reasoning**.
+
+SAY: 
+To introduce it, here’s a question that fascinated me as an undergrad:
+
+WRITE: 
+## How are mathematical functions different from programming language functions?
+Possible answers:
+- A math function always takes the same input to the same output (deterministic)
+  - aka, no randomness / probability
+  - Must return an output!
+- Other "side effects":
+  - Mutable state
+  - Exceptions
+  - Reading input & writing output
+
+SAY:
+Functions in Haskell behave more like mathematical functions. In particular... 
+WRITE: 
+Two distinguishing features: functions...
+- 1. have no side-effects (purity)
+- 2. can be inputs/outputs of other functions (higher-order)
+
+WRITE:
+## Learning Objectives
+You will learn to:
+- Write higher-order programs in Haskell
+- Reason equationally about programs
+-} 
+
+-- SAY:
+-- Before we begin, I should comment that... 
+-- WRITE:
+-- I'm typing in the comments of a Haskell file! Here's some code:
+x = 1 + 1
+-- I will be evaluating Haskell code in comments like this:
+-- >>> x
+-- 2
+
+--------------------------------------------------------------------------------
+-- (2) referential transparency (5 minutes)
+
+-- SAY:
+-- First let's talk about why function purity can be desirable.
+-- (open Counter.py)
+{- 
+```py  
+counter = 0 
+
+def inc(x):
+    global counter
+    counter += 1
+    return x + counter 
+
+print(inc(10))
+print(inc(10))
+```
+-}
+
+-- Question: Can I replace inc(10) with 11 everywhere in my code? 
+--           No. 
+-- SAY:
+-- inc relies on hidden mutable state, meaning it is not a mathematical function:
+-- Write:
+-- We have:
+--    inc(10) = 11 != 12 = inc(10)
+-- So inc(10)      !=      inc(10)    
+
+--------------------------------------------------------------------------------
+-- 3. Haskell functions & equational reasoning (5 minutes)
+-- SAY:
+-- Functions in Haskell are written equationally, with inputs 
+-- on the LHS and outputs on the RHS. 
+
+-- SAY:
+-- For example, this function applies a 7% sales tax to its input:
+salesTax n = 1.07 * n
+
+-- SAY:
+-- QUESTION: If I see `salesTax 1.0` in my program, can I replace it with 1.07?
+-- A: Yes. Always. 
+
+-- SAY:
+--   For the purpose of illustration, let's suppose 
+--   we have a list of subitems in some purchase. 
+items = [20.0 , 35.0 , 50.0]
+
+-- SAY:
+--   Let's apply the sales tax to each item. 
+salesTaxAll []       = [] 
+salesTaxAll (x : xs) = salesTax x : salesTaxAll xs
+--           ^   ^
+--        head   tail 
+{- SAY:
+  Let's dissect what's happening here:
+  A list must either be empty or nonempty. 
+- The first equation returns the empty list given an empty list input.
+- The second equation breaks the list into a head `x` and tail `xs`,
+  applies sales tax to `x` and appends it to the result of recursing on the tail.  
+SAY: 
+Let's see how this function works on `items`.
+>>> salesTaxAll items
+[21.400000000000002,37.45,53.5]
+
+ -} 
+
+-- SAY: 
+--   This is annoying: our decimal places are quite long...
+--   Let's just suppose that we have run out all coin change at our store,
+--   and so we're going to round down each item. 
+-- >>> floor 1.23
+-- 1
+
+-- SAY:
+--   Let's apply that to every element of the list:
+floorAll [] = [] 
+floorAll (x : xs) = floor x : floorAll xs 
+
+-- The final result:
+-- >>> floorAll (salesTaxAll items)
+-- [21,37,54]
+
+--------------------------------------------------------------------------------
+-- Mapping 
+
+-- SAY:
+-- QUESTION: What is the only change we've made between salesTaxAll and floorAll?
+-- COPY PASTE FOR REFERENCE:
+--   salesTaxAll []       = [] 
+--   salesTaxAll (x : xs) = salesTax x : salesTaxAll xs
+--   floorAll    []       = [] 
+--   floorAll    (x : xs) = floor x    : floorAll xs 
+-- A: We replaced "salesTax" with "floor".
+
+-- SAY:
+-- Let's abstract the structure of these two functions. 
+-- We will do so by using a *higher-order* function. 
+-- DO IN REAL TIME: 
+-- 0. start with def'n of floorAll
+-- 1. Rename floorAll to map
+-- 2. add f as input 
+-- 3. replace floor with f 
+--   floorAll    []       = [] 
+--   floorAll    (x : xs) = floor x : floorAll xs 
+
+map f []       =  [] 
+map f (x : xs) = f x : map f xs 
+
+-- SAY:
+-- Now we can reimplement our functions using map. 
+-- >>> map salesTax [1, 2, 3]
+-- [1.07,2.14,3.21]
+
+-- >>> map floor [1.2 , 3.5 , 4.8]
+-- [1,3,4]
+
+--------------------------------------------------------------------------------
+-- Map fusion 
+
+-- WRITE: 
+-- Function composition is written (f . g) and defined by
+--   (f . g) x = f (g x)
+
+-- SAY:
+-- What we have right now is:
+-- >>> floorAll (salesTaxAll [1.0 , 2.25 , 3.99])
+-- [1,2,4]
+
+-- Which can be rewritten to:
+
+-- >>> map floor (map salesTax [1.0 , 2.25 , 3.99])
+-- [1,2,4]
+
+-- SAY: The key insight is we can improve this function still using what's called
+--      *map fusion*.
+{- WRITE: 
+
+## Map fusion law 
+(1) Use the identity:
+      map h [y1 , ... , yn] = [h y1 , ... , h yn]  (1)
+To show that 
+      map (f . g) [x1 , ... , xn] = map f (map g [x1 , ... , xn])
+
+HAVE:
+  map (f . g) [x1 , ... , xn]
+= ...
+GOAL: 
+= map f (map g [x1 , ... , xn])
+
+Answer:
+  map (f . g) [x1 , ... , xn]
+  SAY: First apply equation (1)
+= [ (f . g) x1 , (f . g) x2 , ... , (f . g) xn ]  
+  SAY: Now expand the definition of composition. 
+= [ f (g x1) , ... , f (g xn) ]
+   SAY: Any ideas on what to do next?
+   ANSWER: Use equation (1) in the right-to-left direction. 
+= map f [g x1 , ... , g xn ]
+  SAY: Do the same again. 
+= map f (map g [x1 , ... , xn])
+
+WRITE:
+This is called *equational reasoning*. 
+
+SAY:
+Equational reasoning makes program behavior easier to predict, 
+analyze, optimize, and verify. We can use equational reasoning to
+- prove program correctness 
+- derive and implement optimizations
+
+(2) QUESTION: Which program is more efficient? 
+      map (f . g) [x1 , ... , xn]
+    or 
+      map f (map g [x1 , ... , xn])
+
+Answer: 
+  The first one only iterates over the list once, and so 
+  is more efficient.
+
+    SAY:
+(3) QUESTION: Describe how a compiler might optimize code that includes
+    nested map expressions. Argue why your proposed optimization 
+    would not interfere with the program's meaning.
+
+Answer: 
+  A compiler could rewrite subexpressions of the form map f (map g xs)
+  to map (f . g) xs. This would not interfere with the program's meaning 
+  because the functions f and g are pure and hence referentially transparent.
+  This optimization eliminates intermediate lists and reduces runtime. 
+
+-} 
+
+------------------------------------------------------------------------------
+{- Conclusion 
+
+SAY: Programming with pure functions gives us:
+     - clearer, more predictable code
+     - correctness proofs 
+     - potential optimizations 
+    
+
+    If there is time for questions I would love to answer them. I would 
+    also love to hear if students felt this lecture was too confusing, too easy,
+    or which parts had you hung up?
+-}
+
+
+--------------------------------------------------------------------------------
+-- CUT 1
+
+-- WRITE:
+-- In general, we can show that:
+--   map f [x1 , x2 , ... , xn] = [f x1 , f x2 , ... , f xn]
+-- Proof:
+--   map f (x1 : x2 : ... : xn : [])
+--     SAY: The key insight is that we may "rewrite" by 
+--          the equations of `map` in this term. 
+--     QUESTION: Which equation applies here?
+--    {Apply second equation}
+--  = f x1 : map f (x2 : ... : xn : [])
+--    SAY: now we repeat this process.
+--  = f x1 : f x2 : (map f (... : xn : []))
+--  = f x1 : f x2 : ... : f xn : map f []
+--                               --------
+--    QUESTION: now which equation applies?
+--  = f x1 : f x2 : ... : f xn : [] 
+--  = [f x1 , f x2 , ... , f xn]
+
+--------------------------------------------------------------------------------
+-- CUT 2
+
+-- SAY:
+-- Before we finish I would like to showcase a more sophisticated
+-- example.  
+
+-- SAY:
+-- To make things easier to read, define `cons` as a function 
+-- that adds an element to the front of a list. 
+cons x xs = x : xs 
+
+-- >>> cons 1 [2, 3]
+-- [1,2,3]
+
+-- SAY: 
+-- Here's a definition I've always loved. I encourage you all to try 
+-- to write a powerset function of your own---it's surprisingly tricky. 
+-- (Don't worry about understanding this definition fully.)
+powerset []       = [[]]
+powerset (x : xs) = map (cons x) (powerset xs) ++ powerset xs
+
+-- >>> powerset [1, 2, 3]
+-- [[1,2,3],[1,2],[1,3],[1],[2,3],[2],[3],[]]

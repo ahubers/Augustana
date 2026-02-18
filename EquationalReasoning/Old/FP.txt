@@ -1,0 +1,255 @@
+module FP where
+import Data.Char (toUpper)
+import Prelude hiding 
+  (sum, concat, length, map, repeat, sqrt, filter, any, all, const, succ, reverse, unlines , negate)
+
+{-
+- Talk for Augustana College, Weds Feb 25, 2026
+- Alex Hubers, University of Iowa
+
+# This talk
+
+SAY:
+Some ground rules:
+1. Please just call me Alex.
+2. This talk is meant to feel like a classroom, 
+   so ask questions and answer mine.
+
+
+SAY:
+Today I want to share a topic I love: functional programming in Haskell.
+To keep things accessible, I’ve restricted our scope to one idea:
+**equational reasoning**.
+
+
+SAY: 
+To introduce it, here’s a question that fascinated me as an undergrad:
+
+WRITE: 
+## How are mathematical function different from programming language functions?
+Possible answers:
+- A math function always takes the same input to the same output (deterministic)
+  - aka, no randomness / probability
+  - Must return an output!
+- Other "side effects":
+  - Mutable state
+  - Exceptions
+  - Reading input & writing output
+
+## Functions in Haskell
+SAY:
+Functions in Haskell behave more like mathematical functions. In particular... 
+WRITE: 
+Two distinguishing features: functions...
+- 1. have no side-effects (purity)
+- 2. can be inputs/outputs of other functions (higher-order)
+
+WRITE:
+## Learning Objectives
+You will learn to:
+- Write higher-order programs in Haskell
+- Reason equationally about programs
+-} 
+
+-- SAY:
+-- Before we begin, I should comment that... 
+-- WRITE:
+-- I'm typing in the comments of a Haskell file! Here's some code:
+x = 1 + 1
+-- I will be evaluating Haskell code in comments like this:
+-- >>> x
+-- 2
+-- >>> "hello" ++ " " ++ "world"
+-- "hello world"
+
+--------------------------------------------------------------------------------
+-- SAY:
+-- First let's talk about why function purity can be desirable.
+-- (open Counter.py)
+
+-- Question: Can I replace inc(10) with 11 everywhere in my code? 
+--           No. 
+-- SAY:
+-- inc relies on hidden mutable state, meaning it is not a mathematical function.
+
+--------------------------------------------------------------------------------
+-- SAY:
+-- Functions in Haskell are written equationally, with inputs 
+-- on the LHS and outputs on the RHS. For example:
+
+double n = 2 * n 
+doubleAll []       = [] 
+doubleAll (x : xs) = double x : doubleAll xs
+--         ^   ^
+--      head   tail 
+
+{- SAY:
+- The first equation returns the empty list given an empty list input.
+- The second equation breaks the list into a head `x` and tail `xs`,
+  doubles `x` and appends it to the result of recursing on the tail.  
+SAY: 
+A sample input. Note that function application omits parentheses 
+in Haskell. 
+>>> doubleAll [1, 2, 3]
+[2,4,6]
+
+SAY:
+QUESTION: If I see doubleAll [1, 2, 3], can I replace it with [2, 4, 6]?
+          Yes. Always. 
+
+We can also compute our programs. 
+WRITE: 
+Let xs = x1 : x2 : ... : xn : [] be an arbitrary list.
+  doubleAll xs
+= doubleAll (x1 : x2 : ... : xn : [])
+  SAY: The key insight is that we may "rewrite" by 
+       the equations of `sum` in this term. 
+  QUESTION: Which equation applies here?
+= double x1 : doubleAll (x2 : ... : xn : [])
+  Now we use the same equation on the subterm. 
+= double x1 : double x2 : doubleAll (... : xn : [])   
+  And repeat. 
+= double x1 : double x2 : ... : double xn : doubleAll []
+                                            ------------
+  QUESTION: Which equation applies now? 
+= double x1 : double x2 : ... : double xn : [] 
+= 2 * x1 : 2 * x2 : ... : 2 * xn : [] 
+= [2 * x1 , 2 * x2 , ... , 2 * xn]
+
+WRITE:
+This is called *equational reasoning*. 
+
+SAY:
+Equational reasoning makes program behavior easier to predict, 
+analyze, optimize, and verify. We can use equational reasoning to
+- prove program correctness 
+- derive and implement optimizations
+
+ -} 
+
+
+--------------------------------------------------------------------------------
+-- Generalizing doubleAll 
+
+-- SAY: 
+-- Here is a similar function
+
+negate [] = [] 
+negate (x : xs) = not x : negate xs 
+
+-- >>> negate [True , False , True]
+-- [False,True,False]
+
+-- SAY:
+-- Notice that the only change we've made is that we've replaced
+-- `double` with `not`. 
+
+-- SAY:
+-- Let's abstract the structure of these two functions.
+-- DO: 
+-- 1. Rename negate to map
+-- 2. add f as input 
+-- 3. replace not with f 
+-- negate []       = [] 
+-- negate (x : xs) = not x : doubleAll xs
+
+map f []       =  [] 
+map f (x : xs) = f x : map f xs 
+
+-- >>> map double [1, 2, 3]
+-- [2,4,6]
+
+-- WRITE:
+-- In general, we can show through equational reasoning that:
+--   map f [x1 , x2 , ... , xn] = [f x1 , f x2 , ... , f xn]
+
+-- Some more examples of maps 
+
+-- square every number 
+square x = x * x
+-- >>> map square  [1, -2, 3]
+-- [1,4,9]
+
+-- Turn characters to uppercase
+-- (Note that a string is a list of characters!)
+-- >>> map toUpper "I'm not shouting"
+-- "I'M NOT SHOUTING"
+
+--------------------------------------------------------------------------------
+-- SAY:
+-- The examples I've given are simple, but this abstraction can be 
+-- quite powerful. 
+
+-- SAY:
+-- To make things easier to read, define `cons` as a function 
+-- that adds an element to the front of a list. 
+cons x xs = x : xs 
+
+-- >>> cons 1 [2, 3]
+-- [1,2,3]
+
+-- SAY: 
+-- Here's a definition I've always loved. I encourage you all to try 
+-- to write a powerset function of your own---it's surprisingly tricky. 
+powerset []       = [[]]
+powerset (x : xs) = map (cons x) (powerset xs) ++ powerset xs
+
+-- >>> powerset [1, 2, 3]
+-- [[1,2,3],[1,2],[1,3],[1],[2,3],[2],[3],[]]
+
+--------------------------------------------------------------------------------
+-- Functor composition
+
+-- An important property of mapping is the "functor composition" law. 
+-- Properties such as these can guide program optimizations.  
+
+-- WRITE: 
+-- Function composition is written (f . g) and defined by
+--   (f . g) x = f (g x)
+
+-- For example:
+
+-- >>> map ((> 0) . double) [1, -2 , 3]
+-- [True,False,True]
+
+-- We can use equational reasoning to show that 
+--       map (f . g) [x1 , ... , xn] = map f (map g [x1 , ... , xn])
+
+-- We will make use of the equation
+--       map h [y1 , ... , yn] = [h y1 , ... , h yn]
+
+-- Answer:
+--   map (f . g) [x1 , ... , xn]
+--   {equation 1}
+-- = [ (f . g) x1 , (f . g) x2 , ... , (f . g) xn ]  
+--   {def'n of (.)}
+-- = [ f (g x1) , ... , f (g xn) ]
+--   {equation 1}
+-- = map f [g x1 , ... , g xn ]
+--   {equation 1}
+-- = map f (map g [x1 , ... , xn])
+-- as desired. 
+
+-- (2) Which equation is computationally cheaper? 
+--       map (f . g) [x1 , ... , xn]
+--     or 
+--       map f (map g [x1 , ... , xn])
+
+-- Answer: 
+--   The first one only iterates over the list once, and so 
+--   is cheaper.
+
+-- (3) Describe how a compiler might optimize code that includes
+--     nested map expressions. Argue why your proposed optimization 
+--     would not interfere with the program's meaning.
+
+-- Answer: 
+--   A compiler could rewrite subexpressions of the form map f (map g xs)
+--   to map (f . g) xs. This would not interfere with the program's meaning 
+--   because the functions f and g are pure and hence referentially transparent.
+--   This optimization has a name: map fusion. It eliminates intermediate lists
+--   and reduces runtime. 
+
+--------------------------------------------------------------------------------
+-- SAY:
+-- To conclude, 
