@@ -1,5 +1,5 @@
 
-public Class Arraylists {
+public Class ArrayList {
 
 
     public static void main() {

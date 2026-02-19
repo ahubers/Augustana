@@ -99,6 +99,7 @@ salesTax n = 1.07 * n
 -- SAY:
 -- QUESTION: If I see `salesTax 1.0` in my program, can I replace it with 1.07?
 -- A: Yes. Always. 
+-- This idea will be key later on.
 
 -- SAY:
 --   For the purpose of illustration, let's suppose 
@@ -116,7 +117,8 @@ salesTaxAll (x : xs) = salesTax x : salesTaxAll xs
   A list must either be empty or nonempty. 
 - The first equation returns the empty list given an empty list input.
 - The second equation breaks the list into a head `x` and tail `xs`,
-  applies sales tax to `x` and appends it to the result of recursing on the tail.  
+  applies sales tax to `x` and appends it to the result of recursing on the tail.
+  **Recursion does not have to be scary!**  
 SAY: 
 Let's see how this function works on `items`.
 >>> salesTaxAll items
@@ -196,16 +198,21 @@ map f (x : xs) = f x : map f xs
 {- WRITE: 
 
 ## Map fusion law 
-(1) Use the identity:
-      map h [y1 , ... , yn] = [h y1 , ... , h yn]  (1)
-To show that 
-      map (f . g) [x1 , ... , xn] = map f (map g [x1 , ... , xn])
+  map (f . g) [x1 , ... , xn] = map f (map g [x1 , ... , xn])
 
-HAVE:
-  map (f . g) [x1 , ... , xn]
-= ...
-GOAL: 
-= map f (map g [x1 , ... , xn])
+
+WRITE:
+We will use the following identity:
+  map h [y1 , ... , yn] = [h y1 , ... , h yn]  (equation 1)
+SAY:
+  Let's call this "Equation 1".
+
+START WITH:
+    map (f . g) [x1 , ... , xn]
+  = ...
+  = map f (map g [x1 , ... , xn])
+SAY:
+  We need to fill in the middle. 
 
 Answer:
   map (f . g) [x1 , ... , xn]
@@ -227,6 +234,8 @@ Equational reasoning makes program behavior easier to predict,
 analyze, optimize, and verify. We can use equational reasoning to
 - prove program correctness 
 - derive and implement optimizations
+Equational reasoning is also the fundamental basis for interactive
+theorem proves such as Lean, Roq, and Agda.
 
 (2) QUESTION: Which program is more efficient? 
       map (f . g) [x1 , ... , xn]
@@ -258,10 +267,7 @@ SAY: Programming with pure functions gives us:
      - correctness proofs 
      - potential optimizations 
     
-
-    If there is time for questions I would love to answer them. I would 
-    also love to hear if students felt this lecture was too confusing, too easy,
-    or which parts had you hung up?
+    If there is time for questions I would love to answer them.
 -}
 
 
