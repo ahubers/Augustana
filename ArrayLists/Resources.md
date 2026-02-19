@@ -11,6 +11,7 @@ the introduction to ArrayLists, as I can't talk about other features of its impl
 
 - Song playlist manager
 - Maintaining a list of students, Magic the gathering cards...Maybe let students decide?
+- Chess openings/games? Since I'm a nerd. 
 
 # Resources
 
