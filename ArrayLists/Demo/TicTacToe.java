@@ -14,9 +14,45 @@ public class TicTacToe {
         Circle
     }
 
+    // The board is going to be an ArrayList of ArrayLists!
+    private ArrayList<ArrayList<Mark>> board = new ArrayList<>();
 
     // Make a move on the infinite board.
     public void makeMove(int x, int y, Mark m) {
+
+        // We start with this list [[]]
+        // Say x = 1. Then we need to modify our list to be:
+        // 0 [ [] ,
+        // 1   [] ]
+        while (board.size() <= x) {
+            board.add(new ArrayList<>());
+        }
+
+        // Step 2: Ensure row x has enough columns.
+        // Suppose y = 2 and m = Cross
+        // Then need to turn (the above board) into:
+        // 0 [ [] ,
+        // 1   [null , null, x] ]
+        ArrayList<Mark> row = board.get(x);
+        while (row.size() <= y) {
+            row.add(null);
+        }
+
+        if (row.get(y) != null) {
+            throw new IllegalArgumentException(
+                "Square (" + x + ", " + y + ") is already taken."
+            );            
+        }
+
+        row.set(y, m);
+
+        if (checkWin()) {
+            System.out.println(m + " wins!");
+        }
+
+        System.out.println("Placed " + m + " at (" + x + ", " + y + ")");
+        printBoard();        
+
     }
 
     private boolean checkWin() {
@@ -25,6 +61,12 @@ public class TicTacToe {
 
     public static void main(String[] args) {
         TicTacToe t = new TicTacToe();
+
+        t.makeMove(0, 0, Mark.Cross);
+        t.makeMove(1 , 1 , Mark.Circle);
+        t.makeMove(10 , 10 , Mark.Cross);
+        t.makeMove(2 , 2 , Mark.Circle);
+        t.makeMove(100, 100, Mark.Cross);
     }
 
 
