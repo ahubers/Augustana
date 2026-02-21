@@ -11,9 +11,10 @@ the interface.
 public class TicTacToe {
 
     // 1. Marks a player can place.
-    public static Boolean circle = true; 
-    public static Boolean cross = false;
+    public static final Boolean circle = true; 
+    public static final Boolean cross = false;
 
+    // Print a mark
     public static String Mark(Boolean b) {
         if (b == circle) { 
             return "O";
@@ -21,24 +22,43 @@ public class TicTacToe {
         return "X";
     }
 
-    // 2. The board is an ArrayList of ArrayLists.
+    // 2. The board is an ArrayList of ArrayLists,
+    // much like a 2D-array is an array of arrays.
     private ArrayList<ArrayList<Boolean>> board = new ArrayList<>();
 
     // Make a move on the infinite board.
     public void makeMove(int x, int y, Boolean m) {
 
-        // Step 1: Ensure enough rows.
+        // We start with board = [[]]
+        // Suppose x = 2, y = 2, and m = circle.
+        // Then we need to add two rows:
+        // Start with:
+        //   [[]]
+        // End with:
+        //   [[],
+        //    [],
+        //    []] 
         while (board.size() <= x) {
             board.add(new ArrayList<>());
         }
 
         // Step 2: Ensure row x has enough columns.
+        // We need to do the same thing except in a specific row.
+        // Start with:
+        //   [[],
+        //    [],
+        //    []] 
+        // End with:
+        //   [[],
+        //    [],
+        //    [null, null, null]] 
         ArrayList<Boolean> row = board.get(x);
         while (row.size() <= y) {
             row.add(null);  // null = empty square
         }
 
         // Step 3: Validate.
+        // (We need to check that the player is marking an empty square.)
         if (row.get(y) != null) {
             throw new IllegalArgumentException(
                 "Square (" + x + ", " + y + ") is already taken."
@@ -46,8 +66,17 @@ public class TicTacToe {
         }
 
         // Step 4: Place the move.
+        // Start with:
+        //   [[],
+        //    [],
+        //    [null, null, null]] 
+        // End with:
+        //   [[],
+        //    [],
+        //    [null, null, circle]]         
         row.set(y, m);
 
+        // Let's announce that we placed a mark and then print the board.
         System.out.println("Placed " + Mark(m) + " at (" + x + ", " + y + ")");
         printBoard();
 
