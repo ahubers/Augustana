@@ -1,7 +1,5 @@
 package Talk.Demo;
 
-// - Arrays Good! but...
-//   drawback: fixed length. :(
 public class ArrayListDemo {
 
 
