@@ -1,28 +1,41 @@
-// SAY: 
-//   Arrays are a great data structure with one annoying limitation: we have to specify
-//   the size ahead of time.
-// QUESTION: Do we always know how big of an array we will need?
-// A: No! Many applications and algorithms require a *dynamically sized* array.
-//    ArrayLists are (one of) Java's answers to this problem.
+/*
 
-// SAY:
-//   I want to talk a bit about implementation because:
-//   1. it will become important later in the course when discussing 
-//      linked lists and computational efficiency
-//   2. An important aspect of OOP is abstraction & implementation hiding.
+SAY:
+Some ground rules:
+1. Please just call me Alex.
+2. Please ask questions and answer mine! 
 
-// SAY:
-//   Our specification: implement a list class that has an "add" method.
+SAY: 
+  Arrays are a great data structure with one annoying limitation: we have to specify
+  the size ahead of time.
+QUESTION: Do we always know how big of an array we will need?
+A: No! Many applications and algorithms require a *dynamically sized* array.
+   ArrayLists are (one of) Java's answers to this problem.
+
+SAY:
+  I want to talk a bit about implementation because:
+  1. it will become important later in the course when discussing 
+     linked lists and computational efficiency
+  2. An important aspect of OOP is abstraction & implementation hiding.
+     (Students are at a point in class where they are starting to 
+      build their own classes and implementations.)
+
+SAY:
+  Our specification: implement a list class that has an "add" method.
+*/
 public class ArrayListDemo {
 
     // Under the hood, We will store data in an array
-    private int[] list = new int[1];
+    private int[] list;
     // And keep track of how many elements are in the array
     private int size = 0;
 
+    ArrayListDemo(int i) {
+        this.list = new int[i];
+    }
+
     // Interface: add an integer to the list.
     public void add(int x) {
-        // PROBLEM: what if size == xs.length?
         list[size] = x;
         size++;
     }
@@ -46,7 +59,7 @@ public class ArrayListDemo {
     }
 
     public static void main(String[] args) {
-        ArrayListDemo l = new ArrayListDemo();
+        ArrayListDemo l = new ArrayListDemo(1);
 
         // empty list
         System.out.println(l);

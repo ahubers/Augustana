@@ -3,6 +3,11 @@ package Talk.Demo;
 public class ArrayListDemo {
 
 
+    // constructor
+    ArrayListDemo() {
+
+    }
+    
     // Simple Interface: add an integer to the list.
     public void add(int x) {
 
