@@ -101,37 +101,55 @@ print(inc(10))
 salesTax n = 1.07 * n
 
 -- SAY:
--- QUESTION: If I see `salesTax 1.0` in my program, can I replace it with 1.07?
--- A: Yes. Always. 
--- This idea will be key later on.
-
--- SAY:
 --   For the purpose of illustration, let's suppose 
---   we have a list of subitems in some purchase. 
+--   we have a list of items in some purchase. 
 items = [20.0 , 35.0 , 50.0]
 
 -- SAY:
 --   Let's apply the sales tax to each item. 
 salesTaxAll []       = [] 
 salesTaxAll (x : xs) = salesTax x : salesTaxAll xs
---           ^   ^
---        head   tail 
+--           ^   ^                  
+--        head   tail             
 {- SAY:
-  Let's dissect what's happening here:
-  A list must either be empty or nonempty. 
-- The first equation returns the empty list given an empty list input.
-- The second equation breaks the list into a head `x` and tail `xs`,
-  applies sales tax to `x` and appends it to the result of recursing on the tail.
-  **Recursion does not have to be scary!**  
+  # Recursion does not have to be scary!
+  SAY:
+    We don't have call frames or stacks of environments with this sort of recursion.
+    We can think about this recursion with a "copy and paste" mindset.
+    For example: 
+  WRITE:
+    salesTaxAll (1 : 2 : [])
+    SAY:
+      The key insight is we can "rewrite" by the equations above.
+      We "match" on the second equation.
+  = salesTax 1 : (salesTaxAll (2 : []))
+    {Apply snd equation again}
+  = salesTax 1 : salesTax 2 : (salesTaxAll [])
+    {Apply first equation}
+  = salesTax 1 : salesTax 2 : []
+  = [salesTax 1, salesTax 2]
+
+WRITE:
+This is called *equational reasoning*. 
+
+SAY:
+Equational reasoning makes program behavior easier to predict, 
+analyze, optimize, and verify. We can use equational reasoning to
+- prove program correctness 
+- derive and implement optimizations
+Equational reasoning is also the fundamental basis for interactive
+theorem proves such as Lean, Roq, and Agda.
+
 SAY: 
-Let's see how this function works on `items`.
+Moving on, let's see how this function works on `items`.
+
 -- >>> salesTaxAll items
 -- [21.400000000000002,37.45,53.5]
-
  -} 
 
 -- SAY: 
---   This is annoying: our decimal places are quite long...
+--   Because I'm a discrete mathematician, I am uncomfortable with floating point
+--   precision. 
 --   Let's just suppose that we have run out all coin change at our store,
 --   and so we're going to round down each item. 
 -- >>> floor 1.23
@@ -174,36 +192,46 @@ map f (x : xs) = f x : map f xs
 
 -- SAY:
 -- Now we can reimplement our functions using map. 
--- >>> map salesTax [1, 2, 3]
+-- >>> map salesTax items
 -- [1.07,2.14,3.21]
 
--- >>> map floor [1.2 , 3.5 , 4.8]
+-- >>> map floor items
 -- [1,3,4]
 
+-- WRITE:
+--   In general, we can use equational reasoning to show that:
+--   map f [x1 , ... , xn ] = [f x1 , ... , f xn]
+
 --------------------------------------------------------------------------------
--- Map fusion 
+-- We next need to talk about *function composition*
 
 -- WRITE: 
 -- Function composition is written (f . g) and defined by
 --   (f . g) x = f (g x)
 
+-- SAY: 
+--   For example,
+-- (floor . salesTax) x = floor (salesTax x)
+
 -- SAY:
 -- What we have right now is:
--- >>> floorAll (salesTaxAll [1.0 , 2.25 , 3.99])
+-- >>> floorAll (salesTaxAll items)
 -- [1,2,4]
 
 -- Which can be rewritten to:
 
--- >>> map floor (map salesTax [1.0 , 2.25 , 3.99])
+-- >>> map floor (map salesTax items)
 -- [1,2,4]
 
--- SAY: The key insight is we can improve this function still using what's called
---      *map fusion*.
+-- SAY: Interestingly, we can show this function is equivalent
+--      to the map of a composed function. This is called
+--      the "map fusion" law.
 {- WRITE: 
 
 ## Map fusion law 
-  map (f . g) [x1 , ... , xn] = map f (map g [x1 , ... , xn])
-
+  map (f . g) [x1 , ... , xn] = map f (map g [x1 , ... , xn]
+e.g. 
+  map (floor . salesTax) items = map floor (map salesTax items)
 
 WRITE:
 We will use the following identity:
@@ -230,17 +258,6 @@ Answer:
   SAY: Do the same again. 
 = map f (map g [x1 , ... , xn])
 
-WRITE:
-This is called *equational reasoning*. 
-
-SAY:
-Equational reasoning makes program behavior easier to predict, 
-analyze, optimize, and verify. We can use equational reasoning to
-- prove program correctness 
-- derive and implement optimizations
-Equational reasoning is also the fundamental basis for interactive
-theorem proves such as Lean, Roq, and Agda.
-
 (2) QUESTION: Which program is more efficient? 
       map (f . g) [x1 , ... , xn]
     or 
@@ -251,15 +268,18 @@ Answer:
   is more efficient.
 
     SAY:
-(3) QUESTION: Describe how a compiler might optimize code that includes
-    nested map expressions. Argue why your proposed optimization 
-    would not interfere with the program's meaning.
-
+(3) QUESTION: 
+    (1) Describe how a compiler might optimize code that includes
+        nested map expressions, and  
+    (2) Argue why your proposed optimization 
+        would not interfere with the program's meaning.
 Answer: 
   A compiler could rewrite subexpressions of the form map f (map g xs)
   to map (f . g) xs. This would not interfere with the program's meaning 
   because the functions f and g are pure and hence referentially transparent.
   This optimization eliminates intermediate lists and reduces runtime. 
+
+(4) Finally, would this be true in Python?
 
 -} 
 
