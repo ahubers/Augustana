@@ -10,19 +10,11 @@ the interface.
 */
 public class TicTacToe {
 
-    // 1. Marks a player can place.
+    // Marks a player can place.
     public static final Boolean circle = true; 
     public static final Boolean cross = false;
 
-    // Print a mark
-    public static String Mark(Boolean b) {
-        if (b == circle) { 
-            return "O";
-        }
-        return "X";
-    }
-
-    // 2. The board is an ArrayList of ArrayLists,
+    // The board is an ArrayList of ArrayLists,
     // much like a 2D-array is an array of arrays.
     private ArrayList<ArrayList<Boolean>> board = new ArrayList<>();
 
@@ -104,7 +96,19 @@ public class TicTacToe {
         // t.makeMove(0, 0, Mark.Circle);
     }
 
-       // ----------------------------------------------
+    // ----------------------------------------------
+    // Helper: print a mark. 
+    // ----------------------------------------------
+
+    public static String Mark(Boolean b) {
+        if (b == circle) { 
+            return "O";
+        }
+        return "X";
+    }
+
+
+    // ----------------------------------------------
     // Helper: print the current board state.
     // ----------------------------------------------
     public void printBoard() {

@@ -7,7 +7,7 @@ import Prelude hiding
 Talk for Augustana College, Weds Feb 25, 2026
 Alex Hubers, University of Iowa
 --------------------------------------------------------------------------------
--- (1) introduction. (5 minutes)
+-- (1) introduction.
 
 SAY:
 Some ground rules:
@@ -54,15 +54,17 @@ You will learn to:
 -- I'm typing in the comments of a Haskell file! Here's some code:
 x = 1 + 1
 -- I will be evaluating Haskell code in comments like this:
--- >>> x
--- 2
+
+-- >>> x + 2
+-- 4
 
 --------------------------------------------------------------------------------
--- (2) referential transparency (5 minutes)
+-- (2) referential transparency
 
 -- SAY:
 -- First let's talk about why function purity can be desirable.
 -- (open Counter.py)
+-- (C-c C-c to load python code to repl.)
 {- 
 ```py  
 counter = 0 
@@ -83,8 +85,10 @@ print(inc(10))
 -- inc relies on hidden mutable state, meaning it is not a mathematical function:
 -- Write:
 -- We have:
---    inc(10) = 11 != 12 = inc(10)
--- So inc(10)      !=      inc(10)    
+--    inc(10) = 11
+--    inc(10) = 12
+-- therefore:
+--    inc(10) != inc(10)
 
 --------------------------------------------------------------------------------
 -- 3. Haskell functions & equational reasoning (5 minutes)
@@ -121,8 +125,8 @@ salesTaxAll (x : xs) = salesTax x : salesTaxAll xs
   **Recursion does not have to be scary!**  
 SAY: 
 Let's see how this function works on `items`.
->>> salesTaxAll items
-[21.400000000000002,37.45,53.5]
+-- >>> salesTaxAll items
+-- [21.400000000000002,37.45,53.5]
 
  -} 
 

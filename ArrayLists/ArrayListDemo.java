@@ -1,29 +1,62 @@
-// 1. Arrays are a great data structure. What is one limitation?
-//    They have a *fixed* size. But do we always know how many
-//    things we want to store?
-//
-//    Let's illustrate the idea behind a *dynamically sized* array.
+// SAY: 
+//   Arrays are a great data structure with one annoying limitation: we have to specify
+//   the size ahead of time.
+// QUESTION: Do we always know how big of an array we will need?
+// A: No! Many applications and algorithms require a *dynamically sized* array.
+//    ArrayLists are (one of) Java's answers to this problem.
 
+// SAY:
+//   I want to talk a bit about implementation because:
+//   1. it will become important later in the course when discussing 
+//      linked lists and computational efficiency
+//   2. An important aspect of OOP is abstraction & implementation hiding.
+
+// SAY:
+//   Our specification: implement a list class that has an "add" method.
 public class ArrayListDemo {
 
-    // 2. Internal representation:
-    //    - xs: the backing array
-    //    - size: how many elements are actually stored
-    private int[] xs = new int[1];
+    // Under the hood, We will store data in an array
+    private int[] list = new int[1];
+    // And keep track of how many elements are in the array
     private int size = 0;
 
-    // 3. Append an integer to the list.
+    // Interface: add an integer to the list.
     public void add(int x) {
         // PROBLEM: what if size == xs.length?
-        xs[size] = x;
+        list[size] = x;
         size++;
     }
 
-    public static void main(String[] args) {
-        ArrayListDemo list = new ArrayListDemo();
+    // (hideme)
+    public String toString() {
+        if (size == 0) {
+            return "[]";
+        }
 
-        list.add(1);   // fine
-        list.add(2);   // crash: array out of bounds!
+        if (size == 1) {
+            return "[" + list[0] + "]";
+        }
+
+        String s = "[";
+        for (int i = 0; i < size; i++) {
+            s += list[i] + ", ";
+        }
+        s += "]";
+        return s;
+    }
+
+    public static void main(String[] args) {
+        ArrayListDemo l = new ArrayListDemo();
+
+        // empty list
+        System.out.println(l);
+
+        // singleton list
+        l.add(1); 
+        System.out.println(l);
+
+        // crash: array out of bounds!
+        // list.add(2);   
 
         // Ask class: How can we fix this?
         // 5. The fix (conceptually):

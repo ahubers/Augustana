@@ -1,21 +1,32 @@
 package Demo;
-// 1. Arrays vs. ArrayLists. 
 
 public class ArrayListDemo {
 
-    private int[] xs = new int[1]; 
-    private int size = 0;
 
-    // Append an integer to the list.
-    public void add(Integer x) {
-        xs[size] = x;
-        size++;
+    // Simple Interface: add an integer to the list.
+    public void add(int x) {
+
+    }
+
+    // (hideme)
+    public String toString() {
+        // if (size == 0) {
+        //     return "[]";
+        // }
+
+        // if (size == 1) {
+        //     return "[" + list[0] + "]";
+        // }
+
+        // String s = "[";
+        // for (int i = 0; i < size; i++) {
+        //     s += list[i] + ", ";
+        // }
+        // s += "]";
+        // return s;
+        return "";
     }
 
     public static void main(String[] args) {
-
-        ArrayListDemo list = new ArrayListDemo();
-        list.add(1);
-        list.add(2);
     }
 }

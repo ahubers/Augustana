@@ -5,74 +5,81 @@ import java.util.ArrayList;
 A demo of ArrayLists:
 We implement Tic Tac Toe on an *infinitely expanding* board.
 (Practically: it expands to the right and downward as needed.)
+
+N.b. maybe first go over the planned interface before implementing 
+the interface.
 */
 public class TicTacToe {
 
     // Marks a player can place.
-    public enum Mark {
-        Cross,
-        Circle
-    }
+    public static final Boolean circle = true; 
+    public static final Boolean cross = false;
 
-    // The board is going to be an ArrayList of ArrayLists!
-    private ArrayList<ArrayList<Mark>> board = new ArrayList<>();
+    // The board is an ArrayList of ArrayLists,
+    // much like a 2D-array is an array of arrays.
+    private ArrayList<ArrayList<Boolean>> board = new ArrayList<>();
 
     // Make a move on the infinite board.
-    public void makeMove(int x, int y, Mark m) {
+    public void makeMove(int x, int y, Boolean m) {
 
-        // We start with this list [[]]
-        // Say x = 1. Then we need to modify our list to be:
-        // 0 [ [] ,
-        // 1   [] ]
+        // We start with board = [[]]
         while (board.size() <= x) {
             board.add(new ArrayList<>());
         }
 
-        // Step 2: Ensure row x has enough columns.
-        // Suppose y = 2 and m = Cross
-        // Then need to turn (the above board) into:
-        // 0 [ [] ,
-        // 1   [null , null, x] ]
-        ArrayList<Mark> row = board.get(x);
+        // Ensure row x has enough columns.
+        ArrayList<Boolean> row = board.get(x);
         while (row.size() <= y) {
-            row.add(null);
+            row.add(null);  // null = empty square
         }
 
+        // Validate.
+        // (We need to check that the player is marking an empty square.)
         if (row.get(y) != null) {
             throw new IllegalArgumentException(
                 "Square (" + x + ", " + y + ") is already taken."
-            );            
+            );
         }
 
+        // Place the move.        
         row.set(y, m);
 
+        // Let's announce that we placed a mark and then print the board.
+        System.out.println("Placed " + Mark(m) + " at (" + x + ", " + y + ")");
+        printBoard();
+
+        // Placeholder win check.
         if (checkWin()) {
             System.out.println(m + " wins!");
         }
-
-        System.out.println("Placed " + m + " at (" + x + ", " + y + ")");
-        printBoard();        
-
     }
 
     private boolean checkWin() {
         return false; // not implemented
     }
 
+
     public static void main(String[] args) {
         TicTacToe t = new TicTacToe();
 
-        t.makeMove(0, 0, Mark.Cross);
-        t.makeMove(1 , 1 , Mark.Circle);
-        t.makeMove(10 , 10 , Mark.Cross);
-        t.makeMove(2 , 2 , Mark.Circle);
-        t.makeMove(100, 100, Mark.Cross);
+        t.makeMove(1,  1, cross);
+
+    }
+
+    // ----------------------------------------------
+    // Helper: print a mark. 
+    // ----------------------------------------------
+
+    public static String Mark(Boolean b) {
+        if (b == circle) { 
+            return "O";
+        }
+        return "X";
     }
 
 
     // ----------------------------------------------
     // Helper: print the current board state.
-    // (Ignore me!)
     // ----------------------------------------------
     public void printBoard() {
         int maxX = -1;
@@ -80,7 +87,7 @@ public class TicTacToe {
 
         // Find bounds of occupied area.
         for (int x = 0; x < board.size(); x++) {
-            ArrayList<Mark> row = board.get(x);
+            ArrayList<Boolean> row = board.get(x);
             for (int y = 0; y < row.size(); y++) {
                 if (row.get(y) != null) {
                     maxX = Math.max(maxX, x);
@@ -96,18 +103,17 @@ public class TicTacToe {
 
         // Print the board.
         for (int x = 0; x <= maxX; x++) {
-            ArrayList<Mark> row = board.get(x);
+            ArrayList<Boolean> row = board.get(x);
             for (int y = 0; y <= maxY; y++) {
-                Mark m = (y < row.size()) ? row.get(y) : null;
-                char c = (m == Mark.Cross) ? 'X'
-                        : (m == Mark.Circle) ? 'O'
+                Boolean m = (y < row.size()) ? row.get(y) : null;
+                char c = (m == cross) ? 'X'
+                        : (m == circle) ? 'O'
                         : '.';
                 System.out.print(c + " ");
             }
             System.out.println();
         }
         System.out.println();
-    }    
-    
+    }
 }
 
