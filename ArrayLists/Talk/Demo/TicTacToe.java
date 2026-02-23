@@ -14,22 +14,40 @@ public class TicTacToe {
     // Marks a player can place.
     public static final Boolean circle = true; 
     public static final Boolean cross = false;
+    private Boolean mark = circle;
 
     // Make a move on the infinite board.
-    public void makeMove(int x, int y, Boolean m) {
+    public void makeMove(int x, int y) {
 
         // We start with board = [[]]
+        // Suppose x = 2, y = 2, and m = circle.
+        // Then we need to add two rows:
+        // Start with:
+        //   [[]]
+        // End with:
+        //   [[],
+        //    [],
+        //    []] 
         while (board.size() <= x) {
             board.add(new ArrayList<>());
         }
 
-        // Ensure row x has enough columns.
+        // Step 2: Ensure row x has enough columns.
+        // We need to do the same thing except in a specific row.
+        // Start with:
+        //   [[],
+        //    [],
+        //    []] 
+        // End with:
+        //   [[],
+        //    [],
+        //    [null, null, null]] 
         ArrayList<Boolean> row = board.get(x);
         while (row.size() <= y) {
             row.add(null);  // null = empty square
         }
 
-        // Validate.
+        // Step 3: Validate.
         // (We need to check that the player is marking an empty square.)
         if (row.get(y) != null) {
             throw new IllegalArgumentException(
@@ -37,17 +55,28 @@ public class TicTacToe {
             );
         }
 
-        // Place the move.        
-        row.set(y, m);
+        // Step 4: Place the move.
+        // Start with:
+        //   [[],
+        //    [],
+        //    [null, null, null]] 
+        // End with:
+        //   [[],
+        //    [],
+        //    [null, null, circle]]         
+        row.set(y, this.mark);
 
         // Let's announce that we placed a mark and then print the board.
-        System.out.println("Placed " + Mark(m) + " at (" + x + ", " + y + ")");
+        System.out.println("Placed " + Mark(this.mark) + " at (" + x + ", " + y + ")");
         printBoard();
 
-        // Placeholder win check.
+        // Step 5: Placeholder win check.
         if (checkWin()) {
-            System.out.println(m + " wins!");
+            System.out.println(this.mark + " wins!");
         }
+
+        // toggle the marker
+        this.mark = ! this.mark;
     }
 
     private boolean checkWin() {
@@ -56,10 +85,15 @@ public class TicTacToe {
 
 
     public static void main(String[] args) {
+        // Tic tac toe on an infinite board!
         TicTacToe t = new TicTacToe();
 
-        t.makeMove(1,  1, cross);
-
+        // I'll start
+        t.makeMove(1, 1);
+        t.makeMove(0, 0);
+        t.makeMove(3, 3);
+        t.makeMove(2, 2); 
+    
     }
 
     // ----------------------------------------------

@@ -24,9 +24,10 @@ public class TicTacToe {
     // Marks a player can place.
     public static final Boolean circle = true; 
     public static final Boolean cross = false;
+    private Boolean mark = circle;
 
     // Make a move on the infinite board.
-    public void makeMove(int x, int y, Boolean m) {
+    public void makeMove(int x, int y) {
 
         // We start with board = [[]]
         // Suppose x = 2, y = 2, and m = circle.
@@ -73,7 +74,7 @@ public class TicTacToe {
         //   [[],
         //    [],
         //    [null, null, circle]]         
-        row.set(y, m);
+        row.set(y, this.mark);
 
         // Let's announce that we placed a mark and then print the board.
         System.out.println("Placed " + Mark(m) + " at (" + x + ", " + y + ")");
@@ -83,6 +84,9 @@ public class TicTacToe {
         if (checkWin()) {
             System.out.println(m + " wins!");
         }
+
+        // toggle the marker
+        this.mark = ! this.mark;
     }
 
     private boolean checkWin() {
@@ -92,12 +96,6 @@ public class TicTacToe {
 
     public static void main(String[] args) {
         TicTacToe t = new TicTacToe();
-
-        t.makeMove(0,  0, cross);
-        t.makeMove(1,  1, circle);
-        t.makeMove(2,  2, cross);
-        t.makeMove(5,  5, circle);
-        t.makeMove(10, 10, cross);
 
         // Exception example:
         // t.makeMove(0, 0, Mark.Circle);

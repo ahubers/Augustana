@@ -39,7 +39,7 @@ public class Showcase {
 
 
         // ------------------------------------------------------------
-        // We can get an element of the list by its index. 
+        // 5. We can get an element of the list by its index. 
         // Python: lst[index]
         // ------------------------------------------------------------
         String item = list.get(0);
@@ -47,7 +47,7 @@ public class Showcase {
 
 
         // ------------------------------------------------------------
-        // We can get the index of a value in the list
+        // 6. We can get the index of a value in the list
         // Python: lst.index(value)
         // (Python throws ValueError if not found; Java returns -1)
         // ------------------------------------------------------------
@@ -56,7 +56,7 @@ public class Showcase {
 
 
         // ------------------------------------------------------------
-        // We can specify the value at a given index. 
+        // 7. We can specify the value at a given index. 
         // SAY: Note this will *replace* that value!
 
         // Python: lst[index] = value
@@ -66,7 +66,7 @@ public class Showcase {
 
 
         // ------------------------------------------------------------
-        // We can remove a value at a given index
+        // 8. We can remove a value at a given index
         // Python: lst.pop(index)
         // ------------------------------------------------------------
         list.remove(0);
@@ -74,7 +74,7 @@ public class Showcase {
 
 
         // ------------------------------------------------------------
-        // We can remove a given value
+        // 9. We can remove a given value
         // SAY: Note that this is the same method name but different
         //      behavior!
         // Python: lst.remove(value)
@@ -85,7 +85,7 @@ public class Showcase {
 
 
         // ------------------------------------------------------------
-        // And finally we can wipe the slate clean using clear():
+        // 10. And finally we can wipe the slate clean using clear():
         // Python: lst.clear()
         // ------------------------------------------------------------
         list.clear();

@@ -14,9 +14,10 @@ public class TicTacToe {
     // Marks a player can place.
     public static final Boolean circle = true; 
     public static final Boolean cross = false;
+    private Boolean mark = circle;
 
     // Make a move on the infinite board.
-    public void makeMove(int x, int y, Boolean m) {
+    public void makeMove(int x, int y) {
 
         // We start with board = [[]]
         while (board.size() <= x) {
@@ -38,16 +39,17 @@ public class TicTacToe {
         }
 
         // Place the move.        
-        row.set(y, m);
+        row.set(y, this.mark);
 
         // Let's announce that we placed a mark and then print the board.
-        System.out.println("Placed " + Mark(m) + " at (" + x + ", " + y + ")");
+        System.out.println("Placed " + Mark(this.mark) + " at (" + x + ", " + y + ")");
         printBoard();
 
         // Placeholder win check.
         if (checkWin()) {
-            System.out.println(m + " wins!");
+            System.out.println(this.mark + " wins!");
         }
+        this.mark = ! this.mark;
     }
 
     private boolean checkWin() {
@@ -58,7 +60,7 @@ public class TicTacToe {
     public static void main(String[] args) {
         TicTacToe t = new TicTacToe();
 
-        t.makeMove(1,  1, cross);
+        t.makeMove(1, 1);
 
     }
 
