@@ -5,18 +5,25 @@ A demo of ArrayLists:
 We implement Tic Tac Toe on an *infinitely expanding* board.
 (Practically: it expands to the right and downward as needed.)
 
-N.b. maybe first go over the planned interface before implementing 
-the interface.
+--------------------
+Order of Operations:
+--------------------
+- Hide implementation
+- Demo the code by playing with a student
+- Ask students how we could use ArrayLists to represent the "board"
+- Describe class attributes
+- Describe makeMove() implementation
+
 */
 public class TicTacToe {
-
-    // Marks a player can place.
-    public static final Boolean circle = true; 
-    public static final Boolean cross = false;
 
     // The board is an ArrayList of ArrayLists,
     // much like a 2D-array is an array of arrays.
     private ArrayList<ArrayList<Boolean>> board = new ArrayList<>();
+
+    // Marks a player can place.
+    public static final Boolean circle = true; 
+    public static final Boolean cross = false;
 
     // Make a move on the infinite board.
     public void makeMove(int x, int y, Boolean m) {
