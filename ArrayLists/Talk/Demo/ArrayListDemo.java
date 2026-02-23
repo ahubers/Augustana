@@ -1,4 +1,4 @@
-package Demo;
+package Talk.Demo;
 
 public class ArrayListDemo {
 

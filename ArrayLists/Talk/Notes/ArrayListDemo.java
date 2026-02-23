@@ -56,7 +56,7 @@ public class ArrayListDemo {
         System.out.println(l);
 
         // crash: array out of bounds!
-        // list.add(2);   
+        l.add(2);   
 
         // Ask class: How can we fix this?
         // 5. The fix (conceptually):
