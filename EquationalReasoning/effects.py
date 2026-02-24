@@ -13,10 +13,6 @@ def floor(n):
 def map(f, xs):
     return [f(x) for x in xs]
 
-# composition
-def compose(f, g, x):
-    return f(g(x))
-    
 # Map fusion examples
 # --------------------
 

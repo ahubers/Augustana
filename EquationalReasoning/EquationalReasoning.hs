@@ -79,8 +79,6 @@ print(inc(10))
 ```
 -}
 
--- Question: Can I replace inc(10) with 11 everywhere in my code? 
---           No. 
 -- SAY:
 -- inc relies on hidden mutable state, meaning it is not a mathematical function:
 -- Write:
@@ -89,10 +87,12 @@ print(inc(10))
 --    inc(10) = 12
 -- therefore:
 --    inc(10) != inc(10)
+-- This means we can't really "reason" about it mathematically.
 
 --------------------------------------------------------------------------------
--- 3. Haskell functions & equational reasoning (5 minutes)
 -- SAY:
+-- I next want to demonstrate in Haskell why mathematical reasoning can be valuable,
+-- which I'll do in a few steps. First, 
 -- Functions in Haskell are written equationally, with inputs 
 -- on the LHS and outputs on the RHS. 
 
@@ -121,7 +121,8 @@ salesTaxAll (x : xs) = salesTax x : salesTaxAll xs
     salesTaxAll (1 : 2 : [])
     SAY:
       The key insight is we can "rewrite" by the equations above.
-      We "match" on the second equation.
+      We "match" on the second equation, i.e.,
+      x = 1 and xs = (2 : []). Then...
   = salesTax 1 : (salesTaxAll (2 : []))
     {Apply snd equation again}
   = salesTax 1 : salesTax 2 : (salesTaxAll [])
@@ -160,14 +161,16 @@ Moving on, let's see how this function works on `items`.
 floorAll [] = [] 
 floorAll (x : xs) = floor x : floorAll xs 
 
--- The final result:
+-- The final result of our transaction:
 -- >>> floorAll (salesTaxAll items)
 -- [21,37,54]
 
 --------------------------------------------------------------------------------
--- Mapping 
+-- Higher order functions
 
 -- SAY:
+-- I next want to talk about higher order functions, which are functions that
+-- accept *other* functions as inputs. To illustrate, let's ask...
 -- QUESTION: What is the only change we've made between salesTaxAll and floorAll?
 -- COPY PASTE FOR REFERENCE:
 --   salesTaxAll []       = [] 
@@ -211,10 +214,12 @@ map f (x : xs) = f x : map f xs
 
 -- SAY: 
 --   For example,
--- (floor . salesTax) x = floor (salesTax x)
+-- WRITE:
+--   (floor . salesTax) x = floor (salesTax x)
 
 -- SAY:
 -- What we have right now is:
+
 -- >>> floorAll (salesTaxAll items)
 -- [1,2,4]
 
@@ -224,14 +229,14 @@ map f (x : xs) = f x : map f xs
 -- [1,2,4]
 
 -- SAY: Interestingly, we can show this function is equivalent
---      to the map of a composed function. This is called
---      the "map fusion" law.
+--      to the map of a composed function.
+-- WRITE:
+--    map floor (map salesTax items) = map (floor . salesTax) items
+-- This is called the "map fusion" law.
 {- WRITE: 
 
 ## Map fusion law 
   map (f . g) [x1 , ... , xn] = map f (map g [x1 , ... , xn]
-e.g. 
-  map (floor . salesTax) items = map floor (map salesTax items)
 
 WRITE:
 We will use the following identity:
